@@ -1,0 +1,13 @@
+Package: sophgo-storcli64
+Version: 7.1804-1
+Architecture: riscv64
+Maintainer: Sophgo <support@sophgo.com>
+Section: admin
+Priority: optional
+Description: Broadcom StorCLI utility for Sophgo RISC-V servers (via QEMU emulation)
+ Broadcom StorCLI (v007.1804.0000.0000) management utility for MegaRAID/SAS
+ controllers, packaged for Sophgo RISC-V servers. Since Broadcom does not ship
+ RISC-V binaries, this package uses a custom QEMU user-mode emulator (qemu-x86_64,
+ built for RISC-V with Broadcom RAID ioctl support) to run the x86-64 storcli64
+ binary transparently. After installation, users can simply run "storcli64" as
+ they would on an x86 server.

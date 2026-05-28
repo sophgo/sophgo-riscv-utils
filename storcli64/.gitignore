@@ -1,3 +1,5 @@
 sophgo-storcli64-7.1804/
 sophgo-storcli64-7.1804.tar.gz
 rpmbuild/
+debbuild/
+sophgo-storcli64_7.1804-1_riscv64.deb

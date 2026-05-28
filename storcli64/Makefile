@@ -10,9 +10,13 @@ STAGING  = $(NAME)-$(VERSION)
 
 RPMBUILD = $(CURDIR)/rpmbuild
 
-.PHONY: all rpm srpm clean
+DEBSTAGING = $(CURDIR)/debbuild/$(NAME)_$(VERSION)-$(RELEASE)_$(ARCH)
+DEB        = $(NAME)_$(VERSION)-$(RELEASE)_$(ARCH).deb
+CONTROL    = $(NAME).control
 
-all: rpm srpm
+.PHONY: all rpm srpm deb clean
+
+all: rpm srpm deb
 
 $(TARBALL): $(SPEC)
 	rm -rf $(STAGING)
@@ -44,5 +48,21 @@ srpm: $(TARBALL) $(SPEC)
 		--define '_topdir $(RPMBUILD)'
 	@echo "SRPM: $(RPMBUILD)/SRPMS/$(NAME)-$(VERSION)-$(RELEASE).src.rpm"
 
+deb:
+	rm -rf $(DEBSTAGING)
+	mkdir -p $(DEBSTAGING)/DEBIAN
+	mkdir -p $(DEBSTAGING)/opt/sophgo/storcli64
+	mkdir -p $(DEBSTAGING)/usr/bin
+	cp $(CURDIR)/qemu-x86_64  $(DEBSTAGING)/opt/sophgo/storcli64/qemu-x86_64
+	cp $(CURDIR)/storcli64     $(DEBSTAGING)/opt/sophgo/storcli64/storcli64.real
+	cp $(CURDIR)/storcli64.sh  $(DEBSTAGING)/usr/bin/storcli64
+	chmod 0755 $(DEBSTAGING)/opt/sophgo/storcli64/qemu-x86_64
+	chmod 0755 $(DEBSTAGING)/opt/sophgo/storcli64/storcli64.real
+	chmod 0755 $(DEBSTAGING)/usr/bin/storcli64
+	cp $(CURDIR)/$(CONTROL) $(DEBSTAGING)/DEBIAN/control
+	dpkg-deb --build $(DEBSTAGING)
+	mv $(DEBSTAGING).deb $(CURDIR)/$(DEB)
+	@echo "DEB: $(CURDIR)/$(DEB)"
+
 clean:
-	rm -rf $(STAGING) $(TARBALL) $(RPMBUILD)
+	rm -rf $(STAGING) $(TARBALL) $(RPMBUILD) $(DEBSTAGING) $(DEB) debbuild
