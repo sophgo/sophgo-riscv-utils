@@ -1,0 +1,49 @@
+name: Build Packages
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          if command -v sudo >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y rpm dpkg-dev
+          else
+            apt-get update && apt-get install -y rpm dpkg-dev
+          fi
+
+      - name: Build packages
+        run: cd storcli64 && make clean && make
+
+      - name: Upload artifacts
+        if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            storcli64/rpmbuild/RPMS/riscv64/*.rpm
+            storcli64/rpmbuild/SRPMS/*.rpm
+            storcli64/*.deb
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          gh release create "$TAG" \
+            --title "sophgo-storcli64 $VERSION" \
+            storcli64/rpmbuild/RPMS/riscv64/*.rpm \
+            storcli64/rpmbuild/SRPMS/*.rpm \
+            storcli64/*.deb
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
